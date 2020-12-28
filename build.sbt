@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
 )
 
 Project.inConfig(IntegrationTest)(baseAssemblySettings)
-// You fat JAR will be in target/scala-2.12/grpc-test-bundle.jar
+// You fat JAR will be in target/scala-2.13/grpc-test-bundle.jar
 assemblyJarName in IntegrationTest := s"grpc-test-bundle.jar"
 // Exclude libraries that are already present in the Gatling bundle
 assemblyExcludedJars in assembly in IntegrationTest := {
