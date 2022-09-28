@@ -9,6 +9,7 @@ scalacOptions := Seq(
 libraryDependencies += "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.4.1" % "test,it"
 libraryDependencies += "io.gatling"            % "gatling-test-framework"    % "3.4.1" % "test,it"
 libraryDependencies += "com.github.phisgr" %% "gatling-grpc" % "0.10.1" % "test,it"
+libraryDependencies += "com.authzed.api" % "authzed" % "0.3.0" % "protobuf-src"
 
 PB.targets in Compile := Seq(
   scalapb.gen() -> (sourceManaged in Compile).value
