@@ -1,30 +1,35 @@
 package computerdatabase
 
+import com.authzed.api.v1.core.RelationshipUpdate.Operation
+import com.authzed.api.v1.core.{ObjectReference, Relationship, RelationshipUpdate, SubjectReference}
+import com.authzed.api.v1.permission_service.{PermissionsServiceGrpc, WriteRelationshipsRequest}
 import com.github.phisgr.gatling.grpc.Predef._
 import io.gatling.core.Predef._
-import io.grpc.health.v1.health.HealthCheckResponse.ServingStatus.SERVING
-import io.grpc.health.v1.health.{HealthCheckRequest, HealthGrpc}
-import com.authzed.api.v1.permission_service.{WriteRelationshipsRequest, WriteRelationshipsResponse, PermissionsServiceGrpc}
+import io.grpc.{Metadata, Status}
+import scalapb.UnknownFieldSet
 
 class BasicItSimulation extends Simulation {
 
-  val grpcConf = grpc(managedChannelBuilder("localhost", 50051))
-  val request = grpc("request_1")
-    .rpc(HealthGrpc.METHOD_CHECK)
-    .payload(HealthCheckRequest.defaultInstance)
-    .extract(_.status.some)(_ is SERVING)
+  var sharedKey = "somerandomkeyhere"
+  val TokenHeaderKey: Metadata.Key[String] = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER)
+  val grpcConf = grpc(managedChannelBuilder("localhost", 50051)
+    .disableRetry()
+    .usePlaintext()
+  )
+
+  val relationship = Relationship.of(
+    Option(ObjectReference("account", "456")),
+    "holder_account_party",
+    Option(SubjectReference(Option(ObjectReference("login", "123")), "", UnknownFieldSet.empty)))
+  val relationshipUpdates = Seq(new RelationshipUpdate(Operation.OPERATION_CREATE, Option(relationship)))
 
   val writeRelationshipRequest = grpc("write_relationship_request")
     .rpc(PermissionsServiceGrpc.METHOD_WRITE_RELATIONSHIPS)
-    .payload(WriteRelationshipsRequest.defaultInstance)
-//    .extract(_.writtenAt)(_ is SERVING)
+    .payload(WriteRelationshipsRequest.of(relationshipUpdates, Seq.empty))
+    .header(TokenHeaderKey)(sharedKey)
+    .check(statusCode is Status.Code.OK)
 
   val scn = scenario("Writing permissions")
-    .exec(writeRelationshipRequest)
-//    .pause(7.seconds)
-//    .exec(request)
-//    .exec(request)
-//    .exec(request)
 
   setUp(scn.inject(atOnceUsers(1)).protocols(grpcConf))
 }
