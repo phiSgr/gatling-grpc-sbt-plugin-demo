@@ -10,8 +10,8 @@ import scalapb.UnknownFieldSet
 
 class BasicItSimulation extends Simulation {
 
-  var sharedKey = "somerandomkeyhere"
-  val TokenHeaderKey: Metadata.Key[String] = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER)
+  var sharedKey = "Bearer somerandomkeyhere"
+  val TokenHeaderKey: Metadata.Key[String] = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER)
   val grpcConf = grpc(managedChannelBuilder("localhost", 50051)
     .disableRetry()
     .usePlaintext()
@@ -30,6 +30,7 @@ class BasicItSimulation extends Simulation {
     .check(statusCode is Status.Code.OK)
 
   val scn = scenario("Writing permissions")
+    .exec(writeRelationshipRequest)
 
   setUp(scn.inject(atOnceUsers(1)).protocols(grpcConf))
 }
