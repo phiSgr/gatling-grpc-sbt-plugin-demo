@@ -18,8 +18,8 @@ class BasicItSimulation extends Simulation {
   )
 
   val relationship = Relationship.of(
-    Option(ObjectReference("account", "456")),
-    "holder_account_party",
+    Option(ObjectReference("actor", "456")),
+    "login",
     Option(SubjectReference(Option(ObjectReference("login", "123")), "", UnknownFieldSet.empty)))
   val relationshipUpdates = Seq(new RelationshipUpdate(Operation.OPERATION_CREATE, Option(relationship)))
 
